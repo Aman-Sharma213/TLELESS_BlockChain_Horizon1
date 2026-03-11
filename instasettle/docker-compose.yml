@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: instasettle
+      MYSQL_USER: instasettle_user
+      MYSQL_PASSWORD: instasettle_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  hardhat:
+    build:
+      context: ./contracts
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
+    volumes:
+      - shared-data:/app/shared
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/instasettle
+      - SPRING_DATASOURCE_USERNAME=instasettle_user
+      - SPRING_DATASOURCE_PASSWORD=instasettle_password
+      - WEB3J_CLIENT_ADDRESS=http://hardhat:8545
+      - CONTRACTS_PATH=/app/shared/contract-addresses.json
+    volumes:
+      - shared-data:/app/shared
+    depends_on:
+      database:
+        condition: service_healthy
+      hardhat:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+      - VITE_RPC_URL=http://localhost:8545
+    depends_on:
+      - backend
+
+volumes:
+  shared-data:

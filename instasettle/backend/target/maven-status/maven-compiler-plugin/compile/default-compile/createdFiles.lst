@@ -1,0 +1,14 @@
+com\instasettle\repository\UserRepository.class
+com\instasettle\repository\TradeRepository.class
+com\instasettle\config\CorsConfig.class
+com\instasettle\InstasettleApplication.class
+com\instasettle\service\BlockchainService.class
+com\instasettle\model\User.class
+com\instasettle\service\TradeBookService.class
+com\instasettle\model\Trade.class
+com\instasettle\repository\SettlementRepository.class
+com\instasettle\controller\TradeController.class
+com\instasettle\model\Settlement.class
+com\instasettle\service\UserService.class
+com\instasettle\controller\UserController.class
+com\instasettle\config\Web3jConfig.class
